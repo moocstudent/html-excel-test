@@ -1,0 +1,180 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta property="og:title" content="">
+  <meta property="og:type" content="">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="icon.png">
+  <!-- Place favicon.ico in the root directory -->
+
+
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/easyui.css">
+  <link rel="stylesheet" href="css/icon.css">
+
+  <meta name="theme-color" content="#fafafa">
+
+  <!--实现网络工作室 接收各种网络代码相关解决问题 请联系微信 343840681-->
+  <script src="js/jquery.min.js"></script>
+  <script src="js/easyui-lang-zh_CN.js"></script>
+  <script src="js/jquery.easyui.min.js"></script>
+  <script src="js/date.js"></script>
+  <script src="js/vendor/modernizr-3.11.2.min.js"></script>
+  <script src="js/plugins.js"></script>
+  <script src="js/main.js"></script>
+  <!--<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>-->
+  <!--<script src="https://cdn.bootcdn.net/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>-->
+  <!--<script src="https://cdn.bootcdn.net/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>-->
+<!--  <script src="js/marco.js"></script>-->
+</head>
+
+<body>
+
+<!--上传excel的弹出窗-->
+<div id="uploadonlineinfo" class="easyui-window" style="width:380px;padding:10px 40px" closed="true">
+
+  <form id="fam" method="post" enctype="multipart/form-data">
+
+    <!--<input class="easyui-filebox" id="onlinefilename" name="onlinefilename" data-options="prompt:'文件上传'"-->
+    <!--style="width:100%" />-->
+    <input type="file"
+           id="uploadfile" name="uploadfile" style="width:100%"/>
+  </form>
+  <br>
+
+  <div data-options="region:'south',border:false" style="text-align:center;padding:5px 0 0;">
+    <button id="uploadBtn" class="easyui-b" data-options="iconCls:'icon-ok'"
+            style="width:80px">上传
+    </button>
+  </div>
+  <br>
+    <p style="text-align: center"><a href="/excel/testexcel.xlsx">下载excel模板</a></p>
+
+</div>
+
+<!-- Add your site or application content here -->
+<p>This is a demo for excel import loading test.</p>
+
+<a href="javascript:uploadidalogonline()" class="easyui-linkbutton" iconCls="icon-add" plain="true">
+  批量导入excel并查看可能存在的进度
+</a>
+
+
+<script>
+  /* 上传excel的窗口打开操作 */
+  function uploadidalogonline() {
+    $('#uploadonlineinfo').window('open').dialog('setTitle', '文件上传');
+  }
+
+  // 上传文件
+  $("#uploadBtn").click(uploadonline);
+
+  // 上传操作
+  function uploadonline() {
+
+    console.log("uploadonline");
+    // var add = '/excel/importExcel';
+    var theExcel = $("#uploadfile")[0].files[0];
+    console.log(theExcel);
+    var formData = new FormData();
+    formData.append("theExcel", theExcel);
+    console.log(formData);
+    // if ("undefined" != typeof(uploadFile) && uploadFile != null && uploadFile != "") {
+    //zq说,那么导入这个excel吧
+    $.ajax({
+      url: 'http://localhost:81/excel/importExcel/' + 'no919',
+      type: 'POST',
+      data: formData,
+      async: false,
+      cache: false,
+      contentType: false, //不设置内容类型
+      processData: false, //不处理数据
+      success: function (data) {
+        alert(JSON.stringify(data))
+        //allOk:上传完毕 , listNotValid:非法导入数据, alreadyInSize:成功导入数据条目
+        console.log(JSON.stringify(data))
+        // $.messager.alert("系统提示",JSON.stringify(data));
+        // if (data) {
+        //   $.messager.alert("系统提示", "操作成功！导入:"+alreadyInSize+"条,非法未导入条目:"+listNotValid);
+        // } else {
+        //   $.messager.alert("系统提示", "操作失败！");
+        //   $("#uploadonlineinfo").dialog("close");
+        // }
+      }
+    });
+  }
+
+
+  //check
+  if (window.WebSocket) {
+    console.log('This browser supports WebSocket 如果使用websocket监控进度条,这里是不起效的,而用于监测数据传输成功与导入条目,失败条目,使用接口即可');
+  } else {
+    $.messager.alert("This browser does not supports WebSocket！");
+    console.log('This browser does not supports WebSocket');
+  }
+
+  //结论:如果使用websocket监控进度条,这里是不起效的,而用于监测数据传输成功与导入条目,失败条目,使用接口即可.
+  // var count = 0;
+  // var sock;
+  // var url = 'ws://localhost:81/excel';
+  //
+  // function startWebSocket(){
+  //   sock = new WebSocket(url);
+  //   sock.onopen = function (ev) {
+  //     console.log("正在建立连接...index");
+  //     setTimeout(function () {
+  //       //这里经过测试,同样无法查看每时每刻的进度
+  //       // checkProcess();
+  //     }, 1);
+  //     uploadonline()
+  //   }
+  //
+  //   sock.onmessage = function (ev) {
+  //     console.log("接收并处理消息: " + ev.data);
+  //     if (JSON.stringify(ev.data)) { //假设这里是进度条百分比
+  //       sock.close();
+  //     }
+  //   }
+  //
+  //   sock.onclose = function (ev) {
+  //     console.log("连接关闭...");
+  //   }
+  //
+  // }
+
+  //这里改为获取进度json数据,现已放入第一个接口内进行了返回,这个方法已经不做使用~
+  // function checkProcess() {
+  //   console.log('正在上传excel文件 !');
+  //   // sock.send("可添加接口查看excel现在上传进度!");
+  //   $.ajax({
+  //     url: 'http://localhost:81/excel/' + 'no919', //attention:这里的no919要跟上面的919一样哦,否则找不到这个文件的进度哦
+  //     type: 'GET',
+  //     success: function (data) {
+  //       //allOk:表明该上传的都已经上传, listNotValid表示没有通过校验的数据, alreadyInSize表示已经导入的数据条目
+  //       console.log("查看当前进度数据:"+JSON.stringify(data))
+  //       if (data > 0) {
+  //         $.messager.alert("系统提示", "操作成功！当前导入条目");
+  //       } else {
+  //         // $.messager.alert("系统提示", "操作失败！");
+  //       }
+  //     }
+  //   })
+  // }
+  //
+
+</script>
+
+
+</body>
+
+</html>
